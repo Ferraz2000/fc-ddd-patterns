@@ -46,4 +46,13 @@ export default class Order {
   total(): number {
     return this._items.reduce((acc, item) => acc + item.total(), 0);
   }
+
+  changeCustomer(newCustomer:string):void{
+    this._customerId = newCustomer;
+  }
+
+  changeItems(items: OrderItem[]):void{
+    this._items = items;
+  }
+ 
 }
