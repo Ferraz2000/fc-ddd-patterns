@@ -6,7 +6,9 @@ import ProductCreatedEvent from "../../product/event/product-created.event";
 import EventDispatcher from "./event-dispatcher";
 import Address from "../../customer/value-object/address";
 import NotifyWhenCustomerCreatedHandler from "../../customer/event/handler/notify-when-customer-created";
-import NotifyWhenAddressChangeHandler from "../../customer/event/handler/notify-when-address-change";
+import NotifyWhenAddressChangeHandler from "../../customer/event/handler/notify-when-addresschange";
+import NotifyWhenAddressChangeCreateHandler from "../../customer/event/handler/notify-when-address-change-create";
+import CustomerChangeAddressEvent from "../../customer/event/customer-changeaddress.event";
 
 describe("Domain events tests", () => {
   it("should register an event handler", () => {
@@ -106,9 +108,9 @@ describe("Domain events tests", () => {
 
     expect(spyEventHandler).toHaveBeenCalled();
   });
-  it("should notify customer when changeaddress event handlers", () => {
+  it("should notify customer when changeaddress create event handlers", () => {
     const eventDispatcher = new EventDispatcher();
-    const eventHandler = new NotifyWhenAddressChangeHandler();
+    const eventHandler = new NotifyWhenAddressChangeCreateHandler();
     const spyEventHandler = jest.spyOn(eventHandler, "handle");
 
     eventDispatcher.register("CustomerCreatedEvent", eventHandler);
@@ -121,6 +123,28 @@ describe("Domain events tests", () => {
     const address = new Address("Street 1", 123, "13330-250", "São Paulo");
     customer.changeAddress(address);
     const customerCreatedEvent = new CustomerCreatedEvent(JSON.stringify(customer));
+
+    // Quando o notify for executado o SendEmailWhenProductIsCreatedHandler.handle() deve ser chamado
+    eventDispatcher.notify(customerCreatedEvent);
+
+    expect(spyEventHandler).toHaveBeenCalled();
+  });
+
+  it("should notify customer when changeaddress event handlers", () => {
+    const eventDispatcher = new EventDispatcher();
+    const eventHandler = new NotifyWhenAddressChangeHandler();
+    const spyEventHandler = jest.spyOn(eventHandler, "handle");
+
+    eventDispatcher.register("CustomerChangeAddressEvent", eventHandler);
+
+    expect(
+      eventDispatcher.getEventHandlers["CustomerChangeAddressEvent"][0]
+    ).toMatchObject(eventHandler);
+
+    var customer = new Customer(uuid(),"Ferraz");
+    const address = new Address("Street 1", 123, "13330-250", "São Paulo");
+    customer.changeAddress(address);
+    const customerCreatedEvent = new CustomerChangeAddressEvent(customer);
 
     // Quando o notify for executado o SendEmailWhenProductIsCreatedHandler.handle() deve ser chamado
     eventDispatcher.notify(customerCreatedEvent);
